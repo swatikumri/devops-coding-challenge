@@ -1,0 +1,66 @@
+{
+  "screenshots_dir": "screenshots",
+  "reference_dir": "reference_images",
+  "reports_dir": "bug_reports",
+  "threshold": 0.95,
+  "viewport_sizes": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "name": "desktop"
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "name": "laptop"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "name": "tablet"
+    },
+    {
+      "width": 375,
+      "height": 667,
+      "name": "mobile"
+    }
+  ],
+  "wait_timeout": 10,
+  "screenshot_delay": 2,
+  "test_scenarios": {
+    "sudoku_game": {
+      "url": "http://localhost:8000",
+      "tests": [
+        "game_initialization",
+        "difficulty_selection",
+        "cell_interaction",
+        "game_controls",
+        "responsive_design"
+      ],
+      "difficulty_levels": ["easy", "medium", "hard"],
+      "expected_filled_cells": {
+        "easy": [35, 45],
+        "medium": [25, 35],
+        "hard": [15, 25]
+      }
+    },
+    "visual_regression": {
+      "enabled": true,
+      "compare_with_reference": true,
+      "save_difference_images": true,
+      "threshold": 0.95
+    }
+  },
+  "selenium": {
+    "headless": true,
+    "window_size": "1920,1080",
+    "implicit_wait": 10,
+    "page_load_timeout": 30
+  },
+  "reporting": {
+    "format": "html",
+    "include_screenshots": true,
+    "include_difference_images": true,
+    "detailed_metrics": true
+  }
+}

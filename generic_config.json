@@ -1,0 +1,26 @@
+{
+  "threshold": 0.95,
+  "min_contour_area": 100,
+  "output_dir": "bug_reports",
+  "screenshots_dir": "screenshots",
+  "excel_filename": "bug_report.xlsx",
+  "include_difference_images": true,
+  "detailed_analysis": true,
+  "severity_levels": {
+    "critical": 0.7,
+    "high": 0.8,
+    "medium": 0.9,
+    "low": 0.95
+  },
+  "image_formats": ["png", "jpg", "jpeg", "bmp", "tiff"],
+  "max_image_size": {
+    "width": 4096,
+    "height": 4096
+  },
+  "report_settings": {
+    "include_screenshots": true,
+    "include_difference_images": true,
+    "detailed_metrics": true,
+    "color_coded_severity": true
+  }
+}

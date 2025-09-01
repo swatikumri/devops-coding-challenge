@@ -1,0 +1,15 @@
+selenium==4.15.2
+opencv-python==4.8.1.78
+pillow==10.1.0
+pytest==7.4.3
+pytest-html==4.1.1
+webdriver-manager==4.0.1
+numpy==1.24.3
+matplotlib==3.7.2
+jinja2==3.1.2
+python-dotenv==1.0.0
+requests==2.31.0
+pandas==2.1.4
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+scikit-image==0.21.0

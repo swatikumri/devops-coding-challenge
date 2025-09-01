@@ -1,0 +1,16 @@
+# Dockerfile for Sudoku Game Application
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy application files
+COPY index.html .
+COPY style.css .
+COPY script.js .
+
+# Expose port
+EXPOSE 8000
+
+# Start HTTP server
+CMD ["python", "-m", "http.server", "8000"]
