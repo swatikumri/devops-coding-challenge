@@ -1,70 +1,150 @@
+/**
+ * Configuration constants for the Sudoku game
+ */
+const SUDOKU_CONFIG = {
+    BOARD_SIZE: 9,
+    GRID_SIZE: 81,
+    DIFFICULTY_LEVELS: {
+        easy: { cellsToRemove: 40, maxHints: 5 },
+        medium: { cellsToRemove: 50, maxHints: 3 },
+        hard: { cellsToRemove: 60, maxHints: 2 },
+        expert: { cellsToRemove: 70, maxHints: 1 }
+    },
+    MAX_MOVE_HISTORY: 50,
+    TIMER_INTERVAL: 1000,
+    MESSAGE_TIMEOUT: 3000,
+    TOAST_TIMEOUT: 3000,
+    ANIMATION_TIMEOUT: 1000
+};
+
+/**
+ * Enhanced Sudoku Game class with performance optimizations and error handling
+ */
 class SudokuGame {
+    /**
+     * Initialize the Sudoku game
+     */
     constructor() {
-        this.board = Array(9).fill().map(() => Array(9).fill(0));
-        this.solution = Array(9).fill().map(() => Array(9).fill(0));
-        this.originalBoard = Array(9).fill().map(() => Array(9).fill(0));
-        this.selectedCell = null;
-        this.startTime = null;
-        this.timerInterval = null;
-        this.hintsUsed = 0;
-        this.maxHints = 3;
-        this.cellElements = null;
-        this.moveHistory = [];
-        this.moveIndex = -1;
-        this.gameStats = this.loadStats();
-        this.settings = this.loadSettings();
-        this.currentTheme = localStorage.getItem('theme') || 'light';
-        
-        this.initializeGame();
-        this.setupEventListeners();
-        this.applyTheme();
+        try {
+            // Game state
+            this.board = Array(SUDOKU_CONFIG.BOARD_SIZE).fill().map(() => Array(SUDOKU_CONFIG.BOARD_SIZE).fill(0));
+            this.solution = Array(SUDOKU_CONFIG.BOARD_SIZE).fill().map(() => Array(SUDOKU_CONFIG.BOARD_SIZE).fill(0));
+            this.originalBoard = Array(SUDOKU_CONFIG.BOARD_SIZE).fill().map(() => Array(SUDOKU_CONFIG.BOARD_SIZE).fill(0));
+            
+            // UI state
+            this.selectedCell = null;
+            this.cellElements = null;
+            this.isGameActive = false;
+            
+            // Timer state
+            this.startTime = null;
+            this.timerInterval = null;
+            
+            // Game features
+            this.hintsUsed = 0;
+            this.maxHints = SUDOKU_CONFIG.DIFFICULTY_LEVELS.medium.maxHints;
+            this.moveHistory = [];
+            this.moveIndex = -1;
+            
+            // Settings and stats
+            this.gameStats = this.loadStats();
+            this.settings = this.loadSettings();
+            this.currentTheme = localStorage.getItem('theme') || 'light';
+            
+            // Event listener references for cleanup
+            this.eventListeners = new Map();
+            
+            this.initializeGame();
+            this.setupEventListeners();
+            this.applyTheme();
+            
+        } catch (error) {
+            this.handleError(error, 'constructor');
+            this.showFallbackError();
+        }
     }
 
+    /**
+     * Initialize the game components
+     */
     initializeGame() {
-        this.createBoard();
-        this.generateNewGame();
-        this.updateDisplay();
-        this.startTimer();
+        try {
+            this.createBoard();
+            this.generateNewGame();
+            this.updateDisplay();
+            this.startTimer();
+            this.isGameActive = true;
+        } catch (error) {
+            this.handleError(error, 'initializeGame');
+            this.showMessage('Failed to initialize game. Please refresh the page.', 'error');
+        }
     }
 
+    /**
+     * Create the Sudoku board DOM elements with optimized performance
+     */
     createBoard() {
-        const boardElement = document.getElementById('sudoku-board');
-        boardElement.innerHTML = '';
-        
-        for (let i = 0; i < 81; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.dataset.index = i;
-            cell.setAttribute('role', 'gridcell');
-            cell.setAttribute('tabindex', '0');
-            cell.addEventListener('click', () => this.selectCell(i));
-            cell.addEventListener('keydown', (e) => this.handleCellKeydown(e, i));
-            boardElement.appendChild(cell);
+        try {
+            const boardElement = this.getElementById('sudoku-board');
+            boardElement.innerHTML = '';
+            
+            // Create document fragment for better performance
+            const fragment = document.createDocumentFragment();
+            const cells = [];
+            
+            for (let i = 0; i < SUDOKU_CONFIG.GRID_SIZE; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                cell.setAttribute('role', 'gridcell');
+                cell.setAttribute('tabindex', '0');
+                cell.setAttribute('aria-label', `Cell ${Math.floor(i / 9) + 1}, ${(i % 9) + 1}`);
+                
+                const clickHandler = () => this.selectCell(i);
+                const keydownHandler = (e) => this.handleCellKeydown(e, i);
+                
+                cell.addEventListener('click', clickHandler);
+                cell.addEventListener('keydown', keydownHandler);
+                
+                // Store event listeners for cleanup
+                this.eventListeners.set(`cell-${i}-click`, { element: cell, event: 'click', handler: clickHandler });
+                this.eventListeners.set(`cell-${i}-keydown`, { element: cell, event: 'keydown', handler: keydownHandler });
+                
+                fragment.appendChild(cell);
+                cells.push(cell);
+            }
+            
+            boardElement.appendChild(fragment);
+            
+            // Cache DOM elements for better performance
+            this.cellElements = cells;
+            
+        } catch (error) {
+            this.handleError(error, 'createBoard');
+            throw new Error('Failed to create game board');
         }
-        
-        // Cache DOM elements for better performance
-        this.cellElements = Array.from(document.querySelectorAll('.cell'));
     }
 
+    /**
+     * Generate a new Sudoku puzzle with error handling
+     */
     generateNewGame() {
-        // Generate a complete solution first
-        this.generateSolution();
-        
-        // Copy solution to board
-        for (let i = 0; i < 9; i++) {
-            for (let j = 0; j < 9; j++) {
-                this.solution[i][j] = this.board[i][j];
-            }
-        }
-        
-        // Remove numbers based on difficulty
-        this.removeNumbers();
-        
-        // Store original board (given numbers)
-        for (let i = 0; i < 9; i++) {
-            for (let j = 0; j < 9; j++) {
-                this.originalBoard[i][j] = this.board[i][j];
-            }
+        try {
+            // Generate a complete solution first
+            this.generateSolution();
+            
+            // Copy solution to board using optimized method
+            this.copyBoard(this.board, this.solution);
+            
+            // Remove numbers based on difficulty
+            this.removeNumbers();
+            
+            // Store original board (given numbers)
+            this.copyBoard(this.originalBoard, this.board);
+            
+        } catch (error) {
+            this.handleError(error, 'generateNewGame');
+            this.generateFallbackPuzzle();
         }
     }
 
@@ -129,30 +209,33 @@ class SudokuGame {
         return true;
     }
 
+    /**
+     * Remove numbers from the completed puzzle based on difficulty
+     */
     removeNumbers() {
-        const difficulty = document.getElementById('difficulty-select').value;
-        const difficultyConfig = {
-            easy: { cellsToRemove: 40, maxHints: 5 },
-            medium: { cellsToRemove: 50, maxHints: 3 },
-            hard: { cellsToRemove: 60, maxHints: 2 },
-            expert: { cellsToRemove: 70, maxHints: 1 }
-        };
-        
-        const config = difficultyConfig[difficulty] || difficultyConfig.medium;
-        this.maxHints = config.maxHints;
-        
-        const positions = [];
-        for (let i = 0; i < 9; i++) {
-            for (let j = 0; j < 9; j++) {
-                positions.push([i, j]);
+        try {
+            const difficulty = this.getElementById('difficulty-select').value;
+            const config = SUDOKU_CONFIG.DIFFICULTY_LEVELS[difficulty] || SUDOKU_CONFIG.DIFFICULTY_LEVELS.medium;
+            this.maxHints = config.maxHints;
+            
+            // Generate all positions more efficiently
+            const positions = [];
+            for (let i = 0; i < SUDOKU_CONFIG.GRID_SIZE; i++) {
+                positions.push([Math.floor(i / SUDOKU_CONFIG.BOARD_SIZE), i % SUDOKU_CONFIG.BOARD_SIZE]);
             }
-        }
-        
-        this.shuffleArray(positions);
-        
-        for (let i = 0; i < config.cellsToRemove; i++) {
-            const [row, col] = positions[i];
-            this.board[row][col] = 0;
+            
+            this.shuffleArray(positions);
+            
+            // Remove numbers
+            for (let i = 0; i < config.cellsToRemove && i < positions.length; i++) {
+                const [row, col] = positions[i];
+                this.board[row][col] = 0;
+            }
+            
+        } catch (error) {
+            this.handleError(error, 'removeNumbers');
+            // Use default medium difficulty as fallback
+            this.maxHints = SUDOKU_CONFIG.DIFFICULTY_LEVELS.medium.maxHints;
         }
     }
 
@@ -197,24 +280,43 @@ class SudokuGame {
         }
     }
 
+    /**
+     * Update the display with optimized DOM access
+     */
     updateDisplay() {
-        for (let i = 0; i < 9; i++) {
-            for (let j = 0; j < 9; j++) {
-                const index = i * 9 + j;
-                const cell = this.cellElements[index];
-                const value = this.board[i][j];
-                
-                cell.textContent = value === 0 ? '' : value;
-                cell.className = 'cell';
-                
-                if (this.originalBoard[i][j] !== 0) {
-                    cell.classList.add('given');
-                }
+        try {
+            if (!this.isGameStateValid()) {
+                console.warn('Invalid game state during display update');
+                return;
             }
+            
+            // Use requestAnimationFrame for smooth updates
+            requestAnimationFrame(() => {
+                for (let i = 0; i < SUDOKU_CONFIG.BOARD_SIZE; i++) {
+                    for (let j = 0; j < SUDOKU_CONFIG.BOARD_SIZE; j++) {
+                        const index = i * SUDOKU_CONFIG.BOARD_SIZE + j;
+                        const cell = this.getCellElement(index);
+                        
+                        if (!cell) continue;
+                        
+                        const value = this.board[i][j];
+                        
+                        cell.textContent = value === 0 ? '' : value;
+                        cell.className = 'cell';
+                        
+                        if (this.originalBoard[i][j] !== 0) {
+                            cell.classList.add('given');
+                        }
+                    }
+                }
+                
+                this.updateProgress();
+                this.updateHintsDisplay();
+            });
+            
+        } catch (error) {
+            this.handleError(error, 'updateDisplay');
         }
-        
-        this.updateProgress();
-        this.updateHintsDisplay();
     }
 
     setupEventListeners() {
@@ -653,18 +755,30 @@ class SudokuGame {
     }
 
     // Move History (Undo/Redo)
+    /**
+     * Save move to history with size limit
+     */
     saveMove(row, col, oldValue, newValue) {
-        // Remove any moves after current index
-        this.moveHistory = this.moveHistory.slice(0, this.moveIndex + 1);
-        
-        // Add new move
-        this.moveHistory.push({ row, col, oldValue, newValue });
-        this.moveIndex++;
-        
-        // Limit history size
-        if (this.moveHistory.length > 50) {
-            this.moveHistory.shift();
-            this.moveIndex--;
+        try {
+            // Validate inputs
+            if (!this.validateNumberInput(oldValue) && oldValue !== 0) return;
+            if (!this.validateNumberInput(newValue) && newValue !== 0) return;
+            if (row < 0 || row >= SUDOKU_CONFIG.BOARD_SIZE || col < 0 || col >= SUDOKU_CONFIG.BOARD_SIZE) return;
+            
+            // Remove any moves after current index
+            this.moveHistory = this.moveHistory.slice(0, this.moveIndex + 1);
+            
+            // Add new move
+            this.moveHistory.push({ row, col, oldValue, newValue, timestamp: Date.now() });
+            this.moveIndex++;
+            
+            // Limit history size
+            if (this.moveHistory.length > SUDOKU_CONFIG.MAX_MOVE_HISTORY) {
+                this.moveHistory.shift();
+                this.moveIndex--;
+            }
+        } catch (error) {
+            this.handleError(error, 'saveMove');
         }
     }
 
@@ -894,48 +1008,258 @@ class SudokuGame {
 
     // Enhanced input method with move history
     inputNumber(number) {
-        if (this.selectedCell === null) {
-            this.showMessage('Please select a cell first!', 'error');
-            return;
-        }
-        
-        const row = Math.floor(this.selectedCell / 9);
-        const col = this.selectedCell % 9;
-        
-        // Don't allow editing given numbers
-        if (this.originalBoard[row][col] !== 0) {
-            this.showMessage('Cannot edit given numbers!', 'error');
-            return;
-        }
-        
-        const oldValue = this.board[row][col];
-        
-        // Clear the cell
-        if (number === 0) {
-            this.board[row][col] = 0;
-        } else {
-            // Check if the move is valid
-            if (this.isValidMove(row, col, number)) {
-                this.board[row][col] = number;
-            } else {
-                this.showMessage('Invalid move!', 'error');
-                const cell = this.cellElements[this.selectedCell];
-                cell.classList.add('error');
-                setTimeout(() => cell.classList.remove('error'), 1000);
+        try {
+            // Input validation
+            if (!this.validateNumberInput(number)) {
                 return;
             }
+            
+            if (!this.isGameActive) {
+                this.showMessage('Game is not active', 'warning');
+                return;
+            }
+            
+            if (this.selectedCell === null) {
+                this.showMessage('Please select a cell first!', 'error');
+                return;
+            }
+            
+            const row = Math.floor(this.selectedCell / SUDOKU_CONFIG.BOARD_SIZE);
+            const col = this.selectedCell % SUDOKU_CONFIG.BOARD_SIZE;
+            
+            // Don't allow editing given numbers
+            if (this.originalBoard[row][col] !== 0) {
+                this.showMessage('Cannot edit given numbers!', 'error');
+                return;
+            }
+            
+            const oldValue = this.board[row][col];
+            
+            // Clear the cell
+            if (number === 0) {
+                this.board[row][col] = 0;
+            } else {
+                // Check if the move is valid
+                if (this.isValidMove(row, col, number)) {
+                    this.board[row][col] = number;
+                } else {
+                    this.showMessage('Invalid move!', 'error');
+                    const cell = this.getCellElement(this.selectedCell);
+                    if (cell) {
+                        cell.classList.add('error');
+                        setTimeout(() => cell.classList.remove('error'), SUDOKU_CONFIG.ANIMATION_TIMEOUT);
+                    }
+                    return;
+                }
+            }
+            
+            // Save move to history
+            this.saveMove(row, col, oldValue, this.board[row][col]);
+            
+            this.updateDisplay();
+            this.selectCell(this.selectedCell); // Re-select the cell
+            
+            // Auto-check if enabled
+            if (this.settings.autoCheck && this.isGameComplete()) {
+                this.gameWon();
+            }
+            
+        } catch (error) {
+            this.handleError(error, 'inputNumber');
+            this.showMessage('Failed to input number', 'error');
+        }
+    }
+
+    // Utility and Helper Methods
+    
+    /**
+     * Safely get DOM element by ID with error handling
+     */
+    getElementById(id) {
+        const element = document.getElementById(id);
+        if (!element) {
+            throw new Error(`Element with ID '${id}' not found`);
+        }
+        return element;
+    }
+    
+    /**
+     * Get cell element with bounds checking
+     */
+    getCellElement(index) {
+        if (index < 0 || index >= SUDOKU_CONFIG.GRID_SIZE || !this.cellElements) {
+            return null;
+        }
+        return this.cellElements[index];
+    }
+    
+    /**
+     * Validate number input
+     */
+    validateNumberInput(number) {
+        if (!Number.isInteger(number) || number < 0 || number > SUDOKU_CONFIG.BOARD_SIZE) {
+            console.warn('Invalid number input:', number);
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Efficiently copy one board to another
+     */
+    copyBoard(destination, source) {
+        for (let i = 0; i < SUDOKU_CONFIG.BOARD_SIZE; i++) {
+            for (let j = 0; j < SUDOKU_CONFIG.BOARD_SIZE; j++) {
+                destination[i][j] = source[i][j];
+            }
+        }
+    }
+    
+    /**
+     * Generate a simple fallback puzzle if generation fails
+     */
+    generateFallbackPuzzle() {
+        console.warn('Using fallback puzzle generation');
+        
+        // Simple hardcoded puzzle as fallback
+        const fallbackPuzzle = [
+            [5,3,0,0,7,0,0,0,0],
+            [6,0,0,1,9,5,0,0,0],
+            [0,9,8,0,0,0,0,6,0],
+            [8,0,0,0,6,0,0,0,3],
+            [4,0,0,8,0,3,0,0,1],
+            [7,0,0,0,2,0,0,0,6],
+            [0,6,0,0,0,0,2,8,0],
+            [0,0,0,4,1,9,0,0,5],
+            [0,0,0,0,8,0,0,7,9]
+        ];
+        
+        const fallbackSolution = [
+            [5,3,4,6,7,8,9,1,2],
+            [6,7,2,1,9,5,3,4,8],
+            [1,9,8,3,4,2,5,6,7],
+            [8,5,9,7,6,1,4,2,3],
+            [4,2,6,8,5,3,7,9,1],
+            [7,1,3,9,2,4,8,5,6],
+            [9,6,1,5,3,7,2,8,4],
+            [2,8,7,4,1,9,6,3,5],
+            [3,4,5,2,8,6,1,7,9]
+        ];
+        
+        this.copyBoard(this.board, fallbackPuzzle);
+        this.copyBoard(this.solution, fallbackSolution);
+    }
+    
+    /**
+     * Handle errors with context and appropriate user feedback
+     */
+    handleError(error, context) {
+        const errorMessage = `Error in ${context}: ${error.message}`;
+        console.error(errorMessage, error);
+        
+        // Don't expose stack traces in production
+        if (this.isDevelopment()) {
+            console.error(error.stack);
         }
         
-        // Save move to history
-        this.saveMove(row, col, oldValue, this.board[row][col]);
-        
-        this.updateDisplay();
-        this.selectCell(this.selectedCell); // Re-select the cell
-        
-        // Auto-check if enabled
-        if (this.settings.autoCheck && this.isGameComplete()) {
-            this.gameWon();
+        // Track errors for debugging
+        this.trackError(context, error.message);
+    }
+    
+    /**
+     * Check if running in development mode
+     */
+    isDevelopment() {
+        return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    }
+    
+    /**
+     * Track errors for debugging (could be sent to analytics)
+     */
+    trackError(context, message) {
+        try {
+            const errorLog = JSON.parse(localStorage.getItem('sudoku-errors') || '[]');
+            errorLog.push({
+                context,
+                message,
+                timestamp: Date.now(),
+                userAgent: navigator.userAgent
+            });
+            
+            // Keep only last 10 errors
+            if (errorLog.length > 10) {
+                errorLog.splice(0, errorLog.length - 10);
+            }
+            
+            localStorage.setItem('sudoku-errors', JSON.stringify(errorLog));
+        } catch (e) {
+            console.warn('Failed to track error:', e);
         }
+    }
+    
+    /**
+     * Show fallback error message when critical failure occurs
+     */
+    showFallbackError() {
+        const fallbackMessage = document.createElement('div');
+        fallbackMessage.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #f56565;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            z-index: 10000;
+        `;
+        fallbackMessage.innerHTML = `
+            <h3>Game Error</h3>
+            <p>The Sudoku game encountered an error and cannot continue.</p>
+            <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: white; color: #f56565; border: none; border-radius: 5px; cursor: pointer;">
+                Reload Game
+            </button>
+        `;
+        document.body.appendChild(fallbackMessage);
+    }
+    
+    /**
+     * Clean up resources and event listeners
+     */
+    destroy() {
+        try {
+            this.stopTimer();
+            this.isGameActive = false;
+            
+            // Remove all event listeners
+            this.eventListeners.forEach(({ element, event, handler }) => {
+                element.removeEventListener(event, handler);
+            });
+            this.eventListeners.clear();
+            
+            // Clear any pending timeouts
+            // Note: In a real implementation, you'd track timeout IDs
+            
+            console.log('Sudoku game destroyed successfully');
+        } catch (error) {
+            console.error('Error during cleanup:', error);
+        }
+    }
+    
+    /**
+     * Check if the game state is valid
+     */
+    isGameStateValid() {
+        return (
+            this.board && 
+            this.solution && 
+            this.originalBoard &&
+            this.board.length === SUDOKU_CONFIG.BOARD_SIZE &&
+            this.cellElements &&
+            this.cellElements.length === SUDOKU_CONFIG.GRID_SIZE
+        );
     }
 }
 
