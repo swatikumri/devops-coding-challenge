@@ -25,6 +25,14 @@ pip install -r requirements.txt
 ./run_generic_tests.sh setup
 ```
 
+### 📥 Download Locations
+
+**Mac Users:** `/Users/[username]/Downloads/generic_bug_detection_tool.zip`  
+**Windows Users:** `C:\Users\[username]\Downloads\generic_bug_detection_tool.zip`  
+**Linux Users:** `/home/[username]/Downloads/generic_bug_detection_tool.zip`  
+
+See [DOWNLOAD-LOCATIONS.md](DOWNLOAD-LOCATIONS.md) for complete path information.
+
 ### Basic Usage
 
 ```bash
