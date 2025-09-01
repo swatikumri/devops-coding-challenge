@@ -3,58 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sudoku Game</title>
+    <title>Sudoku Game - Enhanced UI</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎯 Sudoku</h1>
-            <div class="game-info">
-                <div class="timer">
-                    <span>⏱️ Time: </span>
-                    <span id="timer">00:00</span>
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1 class="game-title">
+                        <span class="logo-icon">🧩</span>
+                        Sudoku Master
+                    </h1>
+                    <p class="game-subtitle">Challenge your mind with the ultimate puzzle game</p>
                 </div>
-                <div class="difficulty">
-                    <label for="difficulty-select">Difficulty:</label>
-                    <select id="difficulty-select">
-                        <option value="easy">Easy</option>
-                        <option value="medium" selected>Medium</option>
-                        <option value="hard">Hard</option>
-                    </select>
+                
+                <div class="header-controls">
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button id="settings-btn" class="settings-btn" aria-label="Open settings">
+                        <span class="settings-icon">⚙️</span>
+                    </button>
                 </div>
             </div>
         </header>
 
-        <main>
-            <div class="game-board-container">
-                <div id="sudoku-board" class="sudoku-board"></div>
+        <!-- Main Game Container -->
+        <main class="game-container">
+            <!-- Game Info Panel -->
+            <div class="game-info-panel">
+                <div class="info-card timer-card">
+                    <div class="info-icon">⏱️</div>
+                    <div class="info-content">
+                        <span class="info-label">Time</span>
+                        <span id="timer" class="info-value">00:00</span>
+                    </div>
+                </div>
+                
+                <div class="info-card difficulty-card">
+                    <div class="info-icon">🎯</div>
+                    <div class="info-content">
+                        <span class="info-label">Difficulty</span>
+                        <select id="difficulty-select" class="difficulty-select">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="info-card hints-card">
+                    <div class="info-icon">💡</div>
+                    <div class="info-content">
+                        <span class="info-label">Hints</span>
+                        <span id="hints-count" class="info-value">3/3</span>
+                    </div>
+                </div>
+                
+                <div class="info-card progress-card">
+                    <div class="info-icon">📊</div>
+                    <div class="info-content">
+                        <span class="info-label">Progress</span>
+                        <span id="progress-percent" class="info-value">0%</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="controls">
-                <div class="number-pad">
-                    <button class="number-btn" data-number="1">1</button>
-                    <button class="number-btn" data-number="2">2</button>
-                    <button class="number-btn" data-number="3">3</button>
-                    <button class="number-btn" data-number="4">4</button>
-                    <button class="number-btn" data-number="5">5</button>
-                    <button class="number-btn" data-number="6">6</button>
-                    <button class="number-btn" data-number="7">7</button>
-                    <button class="number-btn" data-number="8">8</button>
-                    <button class="number-btn" data-number="9">9</button>
-                    <button class="number-btn clear" data-number="0">Clear</button>
+            <!-- Game Board Section -->
+            <div class="game-board-section">
+                <div class="board-container">
+                    <div id="sudoku-board" class="sudoku-board" 
+                         role="grid" 
+                         aria-label="Sudoku puzzle grid"
+                         aria-describedby="game-instructions">
+                    </div>
+                    
+                    <!-- Board Overlay for Loading -->
+                    <div id="board-overlay" class="board-overlay">
+                        <div class="loading-spinner"></div>
+                        <p class="loading-text">Generating puzzle...</p>
+                    </div>
+                </div>
+                
+                <!-- Game Instructions -->
+                <div id="game-instructions" class="game-instructions sr-only">
+                    Use arrow keys to navigate, number keys to input values, or click cells to select them.
+                    Press H for hint, C for check, N for new game.
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <!-- Number Input Panel -->
+                <div class="number-input-panel">
+                    <h3 class="panel-title">Number Input</h3>
+                    <div class="number-pad">
+                        <button class="number-btn" data-number="1" aria-label="Input number 1">
+                            <span class="number">1</span>
+                        </button>
+                        <button class="number-btn" data-number="2" aria-label="Input number 2">
+                            <span class="number">2</span>
+                        </button>
+                        <button class="number-btn" data-number="3" aria-label="Input number 3">
+                            <span class="number">3</span>
+                        </button>
+                        <button class="number-btn" data-number="4" aria-label="Input number 4">
+                            <span class="number">4</span>
+                        </button>
+                        <button class="number-btn" data-number="5" aria-label="Input number 5">
+                            <span class="number">5</span>
+                        </button>
+                        <button class="number-btn" data-number="6" aria-label="Input number 6">
+                            <span class="number">6</span>
+                        </button>
+                        <button class="number-btn" data-number="7" aria-label="Input number 7">
+                            <span class="number">7</span>
+                        </button>
+                        <button class="number-btn" data-number="8" aria-label="Input number 8">
+                            <span class="number">8</span>
+                        </button>
+                        <button class="number-btn" data-number="9" aria-label="Input number 9">
+                            <span class="number">9</span>
+                        </button>
+                        <button class="number-btn clear-btn" data-number="0" aria-label="Clear cell">
+                            <span class="clear-icon">🗑️</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="game-actions">
-                    <button id="new-game-btn" class="action-btn">New Game</button>
-                    <button id="hint-btn" class="action-btn">Hint</button>
-                    <button id="check-btn" class="action-btn">Check</button>
-                    <button id="solve-btn" class="action-btn">Solve</button>
+                <!-- Game Actions Panel -->
+                <div class="game-actions-panel">
+                    <h3 class="panel-title">Game Actions</h3>
+                    <div class="action-buttons">
+                        <button id="new-game-btn" class="action-btn primary" aria-label="Start new game">
+                            <span class="btn-icon">🆕</span>
+                            <span class="btn-text">New Game</span>
+                        </button>
+                        <button id="hint-btn" class="action-btn secondary" aria-label="Get hint">
+                            <span class="btn-icon">💡</span>
+                            <span class="btn-text">Hint</span>
+                        </button>
+                        <button id="check-btn" class="action-btn secondary" aria-label="Check solution">
+                            <span class="btn-icon">✅</span>
+                            <span class="btn-text">Check</span>
+                        </button>
+                        <button id="solve-btn" class="action-btn danger" aria-label="Solve puzzle">
+                            <span class="btn-icon">🔧</span>
+                            <span class="btn-text">Solve</span>
+                        </button>
+                        <button id="undo-btn" class="action-btn secondary" aria-label="Undo last move">
+                            <span class="btn-icon">↶</span>
+                            <span class="btn-text">Undo</span>
+                        </button>
+                        <button id="redo-btn" class="action-btn secondary" aria-label="Redo move">
+                            <span class="btn-icon">↷</span>
+                            <span class="btn-text">Redo</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
 
-        <div id="message" class="message"></div>
+        <!-- Statistics Panel -->
+        <aside id="stats-panel" class="stats-panel">
+            <div class="stats-header">
+                <h3>Statistics</h3>
+                <button id="close-stats" class="close-btn" aria-label="Close statistics">×</button>
+            </div>
+            <div class="stats-content">
+                <div class="stat-item">
+                    <span class="stat-label">Games Played</span>
+                    <span id="games-played" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Best Time</span>
+                    <span id="best-time" class="stat-value">--:--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Average Time</span>
+                    <span id="avg-time" class="stat-value">--:--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Win Rate</span>
+                    <span id="win-rate" class="stat-value">0%</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Game Settings</h3>
+                    <button id="close-settings" class="close-btn" aria-label="Close settings">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-group">
+                        <label for="auto-check">Auto-check for errors</label>
+                        <input type="checkbox" id="auto-check" checked>
+                    </div>
+                    <div class="setting-group">
+                        <label for="show-timer">Show timer</label>
+                        <input type="checkbox" id="show-timer" checked>
+                    </div>
+                    <div class="setting-group">
+                        <label for="sound-effects">Sound effects</label>
+                        <input type="checkbox" id="sound-effects">
+                    </div>
+                    <div class="setting-group">
+                        <label for="animations">Animations</label>
+                        <input type="checkbox" id="animations" checked>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message System -->
+        <div id="message" class="message" role="alert" aria-live="polite"></div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
     </div>
 
     <script src="script.js"></script>
