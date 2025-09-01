@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Sudoku</h1>
+            <div class="game-info">
+                <div class="timer">
+                    <span>⏱️ Time: </span>
+                    <span id="timer">00:00</span>
+                </div>
+                <div class="difficulty">
+                    <label for="difficulty-select">Difficulty:</label>
+                    <select id="difficulty-select">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="game-board-container">
+                <div id="sudoku-board" class="sudoku-board"></div>
+            </div>
+
+            <div class="controls">
+                <div class="number-pad">
+                    <button class="number-btn" data-number="1">1</button>
+                    <button class="number-btn" data-number="2">2</button>
+                    <button class="number-btn" data-number="3">3</button>
+                    <button class="number-btn" data-number="4">4</button>
+                    <button class="number-btn" data-number="5">5</button>
+                    <button class="number-btn" data-number="6">6</button>
+                    <button class="number-btn" data-number="7">7</button>
+                    <button class="number-btn" data-number="8">8</button>
+                    <button class="number-btn" data-number="9">9</button>
+                    <button class="number-btn clear" data-number="0">Clear</button>
+                </div>
+
+                <div class="game-actions">
+                    <button id="new-game-btn" class="action-btn">New Game</button>
+                    <button id="hint-btn" class="action-btn">Hint</button>
+                    <button id="check-btn" class="action-btn">Check</button>
+                    <button id="solve-btn" class="action-btn">Solve</button>
+                </div>
+            </div>
+        </main>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
