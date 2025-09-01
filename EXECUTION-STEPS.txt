@@ -1,0 +1,229 @@
+SCREENSHOT BUG DETECTION TOOL - EXECUTION STEPS
+================================================
+
+This document provides step-by-step instructions for setting up and using the Screenshot Bug Detection Tool.
+
+OVERVIEW
+--------
+The Screenshot Bug Detection Tool is a comprehensive testing framework that:
+- Captures screenshots of web applications across different viewport sizes
+- Compares current screenshots with reference images to detect visual regressions
+- Generates detailed HTML bug reports with screenshots and analysis
+- Provides specialized testing for the Sudoku game application
+- Supports Docker-based deployment for consistent testing environments
+
+PREREQUISITES
+-------------
+1. Python 3.8 or higher
+2. pip3 (Python package installer)
+3. Google Chrome or Chromium browser
+4. Docker and Docker Compose (optional, for containerized testing)
+
+INSTALLATION STEPS
+------------------
+
+Method 1: Direct Installation
+1. Clone or download the project files
+2. Navigate to the project directory
+3. Install Python dependencies:
+   pip3 install -r requirements.txt
+4. Make the test runner script executable:
+   chmod +x run_tests.sh
+
+Method 2: Docker Installation
+1. Ensure Docker and Docker Compose are installed
+2. Build the Docker images:
+   docker-compose build
+
+QUICK START
+-----------
+
+1. Setup Environment:
+   ./run_tests.sh setup
+
+2. Start the Sudoku Application:
+   ./run_tests.sh start-app
+
+3. Create Reference Images (First Time Only):
+   ./run_tests.sh create-ref
+
+4. Run All Tests:
+   ./run_tests.sh test-all
+
+DETAILED USAGE
+--------------
+
+1. ENVIRONMENT SETUP
+   Command: ./run_tests.sh setup
+   - Installs Python dependencies
+   - Creates necessary directories
+   - Checks for required software
+
+2. STARTING THE APPLICATION
+   Command: ./run_tests.sh start-app
+   - Starts HTTP server on port 8000
+   - Serves the Sudoku game application
+   - Note: Keep this running while testing
+
+3. CREATING REFERENCE IMAGES
+   Command: ./run_tests.sh create-ref --url http://localhost:8000
+   - Captures baseline screenshots
+   - Stores them in reference_images/ directory
+   - Required before running visual regression tests
+
+4. RUNNING TESTS
+   
+   Visual Regression Tests:
+   ./run_tests.sh test-visual --url http://localhost:8000
+   
+   Sudoku-Specific Tests:
+   ./run_tests.sh test-sudoku --url http://localhost:8000
+   
+   All Tests:
+   ./run_tests.sh test-all --url http://localhost:8000
+
+5. DOCKER-BASED TESTING
+   Setup: ./run_tests.sh docker-setup
+   Run Tests: ./run_tests.sh docker-test
+
+6. CLEANUP
+   Command: ./run_tests.sh clean
+   - Stops running servers
+   - Removes generated files
+   - Cleans up Docker resources
+
+ADVANCED USAGE
+--------------
+
+1. CUSTOM CONFIGURATION
+   - Edit config.json to modify test parameters
+   - Adjust viewport sizes, thresholds, and test scenarios
+   - Specify different URLs and test configurations
+
+2. MANUAL TEST EXECUTION
+   python3 test_runner.py --url http://localhost:8000 --test-type all
+   python3 screenshot_bug_detector.py http://localhost:8000 --test-name my_test
+   python3 sudoku_test_automation.py --url http://localhost:8000 --test all
+
+3. SPECIFIC TEST TYPES
+   - visual_regression: Screenshot comparison tests
+   - sudoku: Game-specific functionality tests
+   - create_reference: Generate baseline images
+   - all: Run all available tests
+
+TEST SCENARIOS
+--------------
+
+The tool includes the following test scenarios:
+
+1. VISUAL REGRESSION TESTING
+   - Captures screenshots across multiple viewport sizes
+   - Compares with reference images using structural similarity
+   - Detects layout changes, missing elements, and visual bugs
+   - Generates difference visualizations
+
+2. SUDOKU GAME TESTING
+   - Game initialization verification
+   - Difficulty selection testing
+   - Cell interaction testing
+   - Game controls testing (hint, check, solve)
+   - Responsive design testing
+
+3. RESPONSIVE DESIGN TESTING
+   - Desktop (1920x1080)
+   - Laptop (1366x768)
+   - Tablet (768x1024)
+   - Mobile (375x667)
+
+OUTPUT AND REPORTS
+------------------
+
+1. SCREENSHOTS
+   - Location: screenshots/ directory
+   - Format: PNG files with timestamps
+   - Naming: {test_name}_{viewport}_{timestamp}.png
+
+2. REFERENCE IMAGES
+   - Location: reference_images/ directory
+   - Used for comparison in visual regression tests
+   - Should be created when application is in known good state
+
+3. BUG REPORTS
+   - Location: bug_reports/ directory
+   - Format: HTML files with detailed analysis
+   - Includes screenshots, metrics, and bug descriptions
+   - Timestamped for easy tracking
+
+TROUBLESHOOTING
+---------------
+
+1. CHROME/CHROMIUM NOT FOUND
+   - Install Google Chrome or Chromium browser
+   - Ensure the browser is in PATH
+   - For Docker, Chrome is included in the image
+
+2. PERMISSION ERRORS
+   - Ensure script has execute permissions: chmod +x run_tests.sh
+   - Check write permissions for output directories
+
+3. PORT ALREADY IN USE
+   - Stop existing server: kill $(cat .server.pid)
+   - Use different port: python3 -m http.server 8080
+
+4. DEPENDENCY ISSUES
+   - Update pip: pip3 install --upgrade pip
+   - Reinstall requirements: pip3 install -r requirements.txt --force-reinstall
+
+5. DOCKER ISSUES
+   - Ensure Docker daemon is running
+   - Check Docker Compose version compatibility
+   - Clean up containers: docker-compose down --rmi all
+
+CONFIGURATION OPTIONS
+---------------------
+
+Key configuration parameters in config.json:
+
+- threshold: Image similarity threshold (0.0-1.0)
+- viewport_sizes: List of viewport configurations
+- wait_timeout: Selenium wait timeout in seconds
+- screenshot_delay: Delay before taking screenshots
+- test_scenarios: Specific test configurations
+
+SECURITY CONSIDERATIONS
+-----------------------
+
+1. The tool runs in headless mode by default
+2. Screenshots may contain sensitive information
+3. Ensure proper access controls on output directories
+4. Use HTTPS URLs for production testing
+5. Regularly clean up old screenshots and reports
+
+PERFORMANCE OPTIMIZATION
+------------------------
+
+1. Use appropriate viewport sizes for your use case
+2. Adjust screenshot_delay based on application load time
+3. Clean up old screenshots regularly
+4. Use Docker for consistent testing environments
+5. Consider parallel execution for multiple test scenarios
+
+SUPPORT AND MAINTENANCE
+-----------------------
+
+1. Regular Updates
+   - Keep Python dependencies updated
+   - Update Chrome/Chromium browser
+   - Review and update test scenarios
+
+2. Monitoring
+   - Check test execution logs
+   - Monitor disk space for screenshots
+   - Review bug reports for patterns
+
+3. Extensions
+   - Add new test scenarios in config.json
+   - Extend test automation classes
+   - Customize report templates
+
+This tool provides a robust foundation for visual regression testing and can be extended for various web applications beyond the Sudoku game.

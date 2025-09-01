@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # Sudoku Game Application
+  sudoku-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.sudoku
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    command: python -m http.server 8000
+    networks:
+      - testing-network
+
+  # Screenshot Bug Detection Tool
+  bug-detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./screenshots:/app/screenshots
+      - ./reference_images:/app/reference_images
+      - ./bug_reports:/app/bug_reports
+      - ./config.json:/app/config.json
+    environment:
+      - DISPLAY=:99
+    depends_on:
+      - sudoku-app
+    networks:
+      - testing-network
+    command: python test_runner.py --url http://sudoku-app:8000 --test-type all
+
+  # Visual regression testing service
+  visual-regression:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./screenshots:/app/screenshots
+      - ./reference_images:/app/reference_images
+      - ./bug_reports:/app/bug_reports
+      - ./config.json:/app/config.json
+    environment:
+      - DISPLAY=:99
+    depends_on:
+      - sudoku-app
+    networks:
+      - testing-network
+    command: python test_runner.py --url http://sudoku-app:8000 --test-type visual_regression
+
+  # Reference image creation service
+  create-reference:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./screenshots:/app/screenshots
+      - ./reference_images:/app/reference_images
+      - ./bug_reports:/app/bug_reports
+      - ./config.json:/app/config.json
+    environment:
+      - DISPLAY=:99
+    depends_on:
+      - sudoku-app
+    networks:
+      - testing-network
+    command: python test_runner.py --url http://sudoku-app:8000 --test-type create_reference --test-name baseline
+
+networks:
+  testing-network:
+    driver: bridge
+
+volumes:
+  screenshots:
+  reference_images:
+  bug_reports:
