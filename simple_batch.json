@@ -1,0 +1,5 @@
+[
+  ["reference_images/homepage_ref.png", "screenshots/homepage_current.png", "homepage_test"],
+  ["reference_images/login_ref.png", "screenshots/login_current.png", "login_test"],
+  ["reference_images/dashboard_ref.png", "screenshots/dashboard_current.png", "dashboard_test"]
+]

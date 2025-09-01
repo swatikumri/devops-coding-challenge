@@ -1,0 +1,34 @@
+{
+  "batch_tests": [
+    {
+      "test_name": "homepage_desktop",
+      "reference_image": "reference_images/homepage_desktop_ref.png",
+      "current_image": "screenshots/homepage_desktop_current.png"
+    },
+    {
+      "test_name": "homepage_mobile",
+      "reference_image": "reference_images/homepage_mobile_ref.png",
+      "current_image": "screenshots/homepage_mobile_current.png"
+    },
+    {
+      "test_name": "login_page",
+      "reference_image": "reference_images/login_page_ref.png",
+      "current_image": "screenshots/login_page_current.png"
+    },
+    {
+      "test_name": "dashboard_desktop",
+      "reference_image": "reference_images/dashboard_desktop_ref.png",
+      "current_image": "screenshots/dashboard_desktop_current.png"
+    },
+    {
+      "test_name": "dashboard_mobile",
+      "reference_image": "reference_images/dashboard_mobile_ref.png",
+      "current_image": "screenshots/dashboard_mobile_current.png"
+    }
+  ],
+  "output_settings": {
+    "excel_filename": "comprehensive_bug_report.xlsx",
+    "include_difference_images": true,
+    "detailed_analysis": true
+  }
+}
